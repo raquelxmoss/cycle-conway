@@ -1,29 +1,27 @@
 {
-  "name": "cycle-hot-reloading-example",
+  "name": "cycle-conway",
   "version": "0.0.1",
-  "description": "A Cycle.js starter project with hot reloading using Browserify",
+  "description": "Conway's game of life in cycle.js",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node server.js",
-    "test": "mocha --compilers js:babel-register",
-    "bundle": "browserify index.js -t babelify -t uglifyify -o bundle.js"
+    "watch": "watchify index.js -o bundle.js -v -t babelify",
+    "build": "browserify index.js -o bundle.js -t babelify",
+    "start": "budo index.js:bundle.js --live='*.css' -- -t babelify | garnish"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Widdershin/cycle-hot-reloading-example.git"
+    "url": "https://github.com/raquelxmoss/cycle-conway"
   },
   "keywords": [
-    "hot",
-    "reloading",
-    "cycle.js",
-    "happiness"
+    "conway",
+    "cycle"
   ],
-  "author": "Nick Johnstone",
+  "author": "Raquel Moss",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Widdershin/cycle-hot-reloading-example/issues"
+    "url": "https://github.com/raquelxmoss/cycle-conway/issues"
   },
-  "homepage": "https://github.com/Widdershin/cycle-hot-reloading-example",
+  "homepage": "https://github.com/raquelxmoss/cycle-conway",
   "dependencies": {
     "@cycle/core": "^6.0.0-rc2",
     "@cycle/dom": "^8.0.0-rc3",
@@ -36,7 +34,6 @@
     "babelify": "^7.2.0",
     "browserify": "^12.0.1",
     "browserify-hmr": "^0.3.1",
-    "budo": "^6.1.0",
-    "uglifyify": "^3.0.1"
+    "budo": "^6.1.0"
   }
 }
