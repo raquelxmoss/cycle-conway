@@ -2,23 +2,11 @@ import { Observable } from 'rx';
 import { div, button } from '@cycle/dom';
 import _ from 'lodash';
 
-const grid = _.range(0, 10).map(function(){
+import seedGrid from './seed_grid'
+
+const grid = _.range(0, 10).map(() => {
   return _.range(0, 10).map(() => ({}))
 })
-
-function seedGrid(grid, probability = 0) {
-  const seededGrid = grid.map(row => {
-    return row.map(cell => {
-      let rand = Math.random()
-
-      cell.alive = probability > rand
-
-      return cell
-    })
-  })
-
-  return seededGrid
-}
 
 function renderCell (cell) {
   return (
@@ -38,13 +26,35 @@ function renderGrid (grid) {
   )
 }
 
+function checkCell (grid, cellPosition) {
+
+  // setCellState(cellState, cell)
+  // return grid
+}
+
+function setCellState (cellState, cell) {
+
+  // return cell
+}
+
 function startGame (e) {
   return function seedGame (state) {
-    const seededGrid = seedGrid(grid, 0.2)
+    const seededGrid = seedGrid(grid, 0.1)
 
-    return Object.assign({}, state, {grid: seededGrid})
+    return Object.assign({}, state, { grid: seededGrid })
   }
 }
+
+function updateGridReducer (e) {
+  return function updateGrid (state) {
+    const grid = state.grid
+
+    console.log(grid)
+    // check each square
+    // return the updated grid to state
+  }
+}
+
 
 const initialState = {
   grid
@@ -55,11 +65,19 @@ export default function App ({DOM}) {
     .select('.start')
     .events('click')
 
+  const tick$ = DOM
+    .select('.step')
+    .events('click')
+
   const startGame$ = startClick$
     .map(e => startGame(e))
 
+  const grid$ = tick$
+    .map(e => updateGridReducer(e))
+
   const reducers$ = Observable.merge(
-    startGame$
+    startGame$,
+    grid$
   )
 
   const state$ = reducers$
@@ -68,9 +86,11 @@ export default function App ({DOM}) {
     .do(console.log.bind(console, 'state'))
 
   return {
-    DOM: state$.map(({grid}) => (div([
+    DOM: state$.map(({grid}) => (
+      div([
         renderGrid(grid),
-        button('.start', 'Start')
+        button('.start', 'Start'),
+        button('.step', 'Step')
       ])
     ))
   };
