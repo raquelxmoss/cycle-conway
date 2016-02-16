@@ -45,4 +45,24 @@ describe('getNeighbouringCellPositions', () => {
 
     assert.deepEqual(neighbours, expected)
   })
+
+  it('seriously doesn\'t freak out about boundaries', () => {
+    const grid = [
+      [{}, {}, {}, {}, {}],
+      [{}, {}, {}, {}, {}],
+      [{}, {}, {}, {}, {}]
+    ]
+
+    const cellPosition = { row: 2, column: 4 }
+
+    const neighbours = getNeighbouringCellPositions(grid, cellPosition)
+
+    const expected = [
+      {row: 1, column: 3},
+      {row: 1, column: 4},
+      {row: 2, column: 3}
+    ]
+
+    assert.deepEqual(neighbours, expected)
+  })
 })

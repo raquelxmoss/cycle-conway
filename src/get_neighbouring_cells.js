@@ -10,17 +10,17 @@ export default function getNeighbouringCellPositions (grid, cellPosition) {
     { row: +1, column: +1 } // bottom-right
   ]
 
-  const gridBounaries = { width: grid[0].length ,  height: grid.length }
+  const gridBounaries = { width: grid[0].length,  height: grid.length }
 
-  const cells = coordinates
+  const cellPositions = coordinates
     .map(coordinate => {
       const row = cellPosition.row
       const column = cellPosition.column
 
-      return { row: row + coordinate.row, column: column + coordinate.column }})
-    .filter(coordinate => {
-      return (coordinate.row >= 0 && coordinate.row <= gridBounaries.width) && (coordinate.column >= 0 && coordinate.column <= gridBounaries.width)
+      return { row: row + coordinate.row, column: column + coordinate.column }
+    }).filter(coordinate => {
+      return((coordinate.row >= 0 && coordinate.row < gridBounaries.height) && (coordinate.column >= 0 && coordinate.column < gridBounaries.width))
     })
 
-  return cells
+  return cellPositions
 }

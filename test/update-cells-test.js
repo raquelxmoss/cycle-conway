@@ -1,6 +1,7 @@
 import assert from 'assert'
 
 import getNeighbouringCellPositions from '../src/get_neighbouring_cells'
+import updateCell from '../src/update_cell'
 
 describe('updateCell', () => {
   it('dies if fewer than two of its neighbours are alive', () => {
@@ -9,23 +10,49 @@ describe('updateCell', () => {
       [{alive: false}, {alive: true}]
     ]
 
-    const cellToCheck = { row: 0, column: 0 }
+    const cellToCheckPosition = { row: 0, column: 0 }
 
-    const neighbours = getNeighbouringCellPositions(grid, cellToCheck)
+    const updatedCell = updateCell(grid, cellToCheckPosition)
 
-    updateCell(grid[0][0], neighbours)
-    console.log(neighbours)
+    assert.equal(updatedCell.alive, false)
   })
 
-  xit('lives if 2 or 3 of its neighbours are alive', () => {
+  it('lives if 2 or 3 of its neighbours are alive', () => {
+    const grid = [
+      [{alive: false}, {alive: true}],
+      [{alive: false}, {alive: true}]
+    ]
 
+    const cellToCheckPosition = { row: 0, column: 0 }
+
+    const updatedCell = updateCell(grid, cellToCheckPosition)
+
+    assert.equal(updatedCell.alive, true)
   })
 
-  xit('dies if more than three of its neighbours are alive', () => {
+  it('dies if more than three of its neighbours are alive', () => {
+    const grid = [
+      [{alive: true}, {alive: true}, {alive: true}],
+      [{alive: true}, {alive: true}, {alive: true}]
+    ]
 
+    const cellToCheckPosition = { row: 0, column: 1 }
+
+    const updatedCell = updateCell(grid, cellToCheckPosition)
+
+    assert.equal(updatedCell.alive, false)
   })
 
-  xit('is revived if it has 3 live neighbours', () => {
+  it('is revived if it has 3 live neighbours', () => {
+    const grid = [
+      [{alive: true}, {alive: true}, {alive: false}],
+      [{alive: true}, {alive: true}, {alive: false}]
+    ]
 
+    const cellToCheckPosition = { row: 0, column: 1 }
+
+    const updatedCell = updateCell(grid, cellToCheckPosition)
+
+    assert.equal(updatedCell.alive, true)
   })
 })
