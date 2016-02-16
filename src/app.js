@@ -68,7 +68,6 @@ export default function App ({DOM}) {
   const state$ = reducers$
     .startWith(initialState)
     .scan((state, reducer) => reducer(state))
-    .do(console.log.bind(console, 'state'))
 
   return {
     DOM: state$.map(({grid}) => (
