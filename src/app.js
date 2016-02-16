@@ -5,8 +5,8 @@ import _ from 'lodash';
 import seedGrid from './seed_grid'
 import updateGrid from './update_grid'
 
-const grid = _.range(0, 50).map(() => {
-  return _.range(0, 50).map(() => ({}))
+const grid = _.range(0, 35).map(() => {
+  return _.range(0, 35).map(() => ({}))
 })
 
 const initialState = {
