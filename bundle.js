@@ -28795,8 +28795,8 @@ var _update_grid2 = _interopRequireDefault(_update_grid);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var grid = _lodash2.default.range(0, 50).map(function () {
-  return _lodash2.default.range(0, 50).map(function () {
+var grid = _lodash2.default.range(0, 35).map(function () {
+  return _lodash2.default.range(0, 35).map(function () {
     return {};
   });
 });
