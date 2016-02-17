@@ -28795,6 +28795,8 @@ var _update_grid2 = _interopRequireDefault(_update_grid);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var INTRO = 'This implementation of <a href="https://en.wikipedia.org/wiki/Conway\'s_Game_of_Life" target="_blank">Conway\'s Game of Life</a>\n  was made lovingly with <a href="http://cycle.js.org" target="_blank">Cycle.js</a><br /><br />';
+
 var grid = _lodash2.default.range(0, 35).map(function () {
   return _lodash2.default.range(0, 35).map(function () {
     return {};
@@ -28840,7 +28842,7 @@ function App(_ref) {
 
   var startClick$ = DOM.select('.start').events('click');
 
-  var tick$ = DOM.select('.step').events('click');
+  var tick$ = _rx.Observable.interval(100);
 
   var startGame$ = startClick$.map(function (e) {
     return startGame(e);
@@ -28859,7 +28861,7 @@ function App(_ref) {
   return {
     DOM: state$.map(function (_ref2) {
       var grid = _ref2.grid;
-      return (0, _dom.div)([renderGrid(grid), (0, _dom.button)('.start', 'Start'), (0, _dom.button)('.step', 'Step')]);
+      return (0, _dom.div)('.container', [(0, _dom.h1)('.header', 'Conway\'s Game of Life'), (0, _dom.div)('.intro', { innerHTML: INTRO }), (0, _dom.button)('.start', 'Start'), renderGrid(grid)]);
     })
   };
 }
