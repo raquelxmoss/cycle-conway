@@ -1,3 +1,33 @@
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #009688;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: #673AB7;
+}
+
+h1 {
+  font-family: 'Pacifico', cursive;
+  color: #673AB7;
+  font-size: 2.5em;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .grid {
   display: flex;
   flex-direction: column;
@@ -9,11 +39,31 @@
 }
 
 .cell {
-  border: 1px solid black;
-  height: 1em;
-  width: 1em;
+  margin: 0.2em;
+  border-radius: 50%;
+  height: 0.5em;
+  width: 0.5em;
 }
 
 .alive {
-  background: red;
+  background: #009688;
+}
+
+.start {
+  margin: 1em;
+  padding: 1em 1.5em;
+  color: white;
+  font-size: 1em;
+  text-transform: uppercase;
+  background: #673AB7;
+  border: none;
+  transition: background 0.3s;
+}
+
+.start:hover {
+  background: #2196F3;
+}
+
+.start:active, .start:focus {
+  outline: none;
 }
