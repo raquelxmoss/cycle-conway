@@ -1,9 +1,12 @@
 import { Observable } from 'rx';
-import { div, button } from '@cycle/dom';
+import { div, button, h1, h2 } from '@cycle/dom';
 import _ from 'lodash';
 
 import seedGrid from './seed_grid'
 import updateGrid from './update_grid'
+
+const INTRO = `This implementation of <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life" target="_blank">Conway's Game of Life</a>
+  was made lovingly with <a href="http://cycle.js.org" target="_blank">Cycle.js</a><br /><br />`
 
 const grid = _.range(0, 35).map(() => {
   return _.range(0, 35).map(() => ({}))
@@ -50,9 +53,7 @@ export default function App ({DOM}) {
     .select('.start')
     .events('click')
 
-  const tick$ = DOM
-    .select('.step')
-    .events('click')
+  const tick$ = Observable.interval(100)
 
   const startGame$ = startClick$
     .map(e => startGame(e))
@@ -71,10 +72,11 @@ export default function App ({DOM}) {
 
   return {
     DOM: state$.map(({grid}) => (
-      div([
-        renderGrid(grid),
+      div('.container', [
+        h1('.header', 'Conway\'s Game of Life'),
+        div('.intro', {innerHTML: INTRO}),
         button('.start', 'Start'),
-        button('.step', 'Step')
+        renderGrid(grid)
       ])
     ))
   };
