@@ -1,21 +1,50 @@
 import assert from 'assert'
 
 import updateGrid from '../src/update_grid'
+import { assertGridEqual, createTestGrid } from './helpers'
 
 describe('updateGrid', () => {
   it('updates each cell on the grid', () => {
-    const initialGrid = [
-      [{alive: false}, {alive: true}, {alive: false}, {alive: true}],
-      [{alive: true}, {alive: false}, {alive: false}, {alive: true}],
-      [{alive: false}, {alive: false}, {alive: true}, {alive: false}]
-    ]
+    const initialGrid  = createTestGrid(`
+      X
+       X
+    `)
 
-    const expectedGrid = [
-      [{alive: true}, {alive: false}, {alive: true}, {alive: false}],
-      [{alive: false}, {alive: true}, {alive: false}, {alive: true}],
-      [{alive: false}, {alive: true}, {alive: false}, {alive: true}]
-    ]
+    const expectedGrid = createTestGrid(`
+        
 
-    assert.deepEqual(updateGrid(initialGrid), expectedGrid)
+    `)
+
+    assertGridEqual(updateGrid(initialGrid), expectedGrid)
+  })
+
+  it('produces a blinker pattern', () => {
+    const initialGrid  = createTestGrid(`
+       X 
+       X 
+       X 
+    `)
+
+    const expectedGrid = createTestGrid(`
+         
+      XXX
+
+    `)
+
+    assertGridEqual(updateGrid(initialGrid), expectedGrid)
+  })
+
+  it('produces a block pattern', () => {
+    const initialGrid  = createTestGrid(`
+       XX
+       XX
+    `)
+
+    const expectedGrid = createTestGrid(`
+       XX
+       XX
+    `)
+
+    assertGridEqual(updateGrid(initialGrid), expectedGrid)
   })
 })
