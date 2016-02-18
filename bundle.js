@@ -28797,8 +28797,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var INTRO = 'This implementation of <a href="https://en.wikipedia.org/wiki/Conway\'s_Game_of_Life" target="_blank">Conway\'s Game of Life</a>\n  was made lovingly with <a href="http://cycle.js.org" target="_blank">Cycle.js</a><br /><br />';
 
-var grid = _lodash2.default.range(0, 35).map(function () {
-  return _lodash2.default.range(0, 35).map(function () {
+var grid = _lodash2.default.range(0, 55).map(function () {
+  return _lodash2.default.range(0, 55).map(function () {
     return {};
   });
 });
@@ -28807,25 +28807,25 @@ var initialState = {
   grid: grid
 };
 
-function renderCell(cell) {
-  return (0, _dom.div)('.cell ' + (cell.alive ? '.alive' : ''));
+function renderCell(cell, rowIndex, column) {
+  return (0, _dom.div)('.cell ' + (cell.alive ? '.alive' : ''), { key: rowIndex * 55 + column });
 }
 
-function renderRow(row) {
-  return (0, _dom.div)('.row', row.map(function (cell) {
-    return renderCell(cell);
+function renderRow(row, rowIndex) {
+  return (0, _dom.div)('.row', row.map(function (cell, column) {
+    return renderCell(cell, rowIndex, column);
   }));
 }
 
 function renderGrid(grid) {
-  return (0, _dom.div)('.grid', grid.map(function (row) {
-    return renderRow(row);
+  return (0, _dom.div)('.grid', grid.map(function (row, rowIndex) {
+    return renderRow(row, rowIndex);
   }));
 }
 
 function startGame(e) {
   return function seedGame(state) {
-    var seededGrid = (0, _seed_grid2.default)(grid, 0.05);
+    var seededGrid = (0, _seed_grid2.default)(grid, 0.3);
 
     return Object.assign({}, state, { grid: seededGrid });
   };
@@ -28837,15 +28837,27 @@ function updateGridReducer(e) {
   };
 }
 
+function updateSpeed(e) {
+  return function (state) {
+    return Object.assign({}, state, { speed: e.target.value });
+  };
+}
+
 function App(_ref) {
   var DOM = _ref.DOM;
 
   var startClick$ = DOM.select('.start').events('click');
 
-  var tick$ = _rx.Observable.interval(100);
+  var speedInput$ = DOM.select('.speed').events('change').map(function (e) {
+    return e.target.value;
+  }).startWith(250);
 
   var startGame$ = startClick$.map(function (e) {
     return startGame(e);
+  });
+
+  var tick$ = speedInput$.flatMapLatest(function (speed) {
+    return _rx.Observable.interval(speed);
   });
 
   var grid$ = tick$.map(function (e) {
@@ -28859,9 +28871,8 @@ function App(_ref) {
   });
 
   return {
-    DOM: state$.map(function (_ref2) {
-      var grid = _ref2.grid;
-      return (0, _dom.div)('.container', [(0, _dom.h1)('.header', 'Conway\'s Game of Life'), (0, _dom.div)('.intro', { innerHTML: INTRO }), (0, _dom.button)('.start', 'Start'), renderGrid(grid)]);
+    DOM: state$.map(function (state) {
+      return (0, _dom.div)('.container', [(0, _dom.div)([(0, _dom.h1)('.header', 'Conway\'s Game of Life'), (0, _dom.div)('.intro', { innerHTML: INTRO }), (0, _dom.input)('.speed', { type: 'range', min: 0, max: 500 }), (0, _dom.button)('.start', 'Start')]), renderGrid(state.grid)]);
     })
   };
 }
@@ -28939,6 +28950,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function updateCell(grid, cellPosition) {
   var neighbourPositions = (0, _get_neighbouring_cells2.default)(grid, cellPosition);
+  var cell = grid[cellPosition.row][cellPosition.column];
 
   var neighbourStatuses = neighbourPositions.map(function (position) {
     return grid[position.row][position.column].alive;
@@ -28948,21 +28960,25 @@ function updateCell(grid, cellPosition) {
     return status === true;
   });
 
-  if (aliveNeighbours.length < 2) {
-    return Object.assign({}, grid[cellPosition.row][cellPosition.column], { alive: false });
+  if (cell.alive) {
+    if (aliveNeighbours.length < 2) {
+      return Object.assign({}, grid[cellPosition.row][cellPosition.column], { nextAliveStatus: false });
+    }
+
+    if (aliveNeighbours.length === 2) {
+      return Object.assign({}, grid[cellPosition.row][cellPosition.column], { nextAliveStatus: true });
+    }
+
+    if (aliveNeighbours.length > 3) {
+      return Object.assign({}, grid[cellPosition.row][cellPosition.column], { nextAliveStatus: false });
+    }
   }
 
-  if (aliveNeighbours.length === 2) {
-    return Object.assign({}, grid[cellPosition.row][cellPosition.column], { alive: true });
+  if (aliveNeighbours.length === 3 && !cell.alive) {
+    return Object.assign({}, grid[cellPosition.row][cellPosition.column], { nextAliveStatus: true });
   }
 
-  if (aliveNeighbours.length === 3) {
-    return Object.assign({}, grid[cellPosition.row][cellPosition.column], { alive: true });
-  }
-
-  if (aliveNeighbours.length > 3) {
-    return Object.assign({}, grid[cellPosition.row][cellPosition.column], { alive: false });
-  }
+  return cell;
 }
 
 },{"./get_neighbouring_cells":65,"lodash":21}],68:[function(require,module,exports){
@@ -28986,7 +29002,11 @@ function updateGrid(grid) {
     });
   });
 
-  return updatedGrid;
+  return updatedGrid.map(function (row) {
+    return row.map(function (cell) {
+      return Object.assign({}, cell, { alive: cell.nextAliveStatus });
+    });
+  });
 }
 
 },{"./update_cell":67}]},{},[1]);
