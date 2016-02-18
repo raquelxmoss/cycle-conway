@@ -7,5 +7,9 @@ export default function updateGrid (grid) {
     })
   })
 
-  return updatedGrid
+  return updatedGrid.map(row => {
+    return row.map(cell => {
+      return Object.assign({}, cell, {alive: cell.nextAliveStatus})
+    })
+  })
 }

@@ -16,27 +16,27 @@ const initialState = {
   grid,
 }
 
-function renderCell (cell) {
+function renderCell (cell, rowIndex, column) {
   return (
-    div(`.cell ${cell.alive ? '.alive' : ''}`)
+    div(`.cell ${cell.alive ? '.alive' : ''}`, {key: rowIndex * 55 + column})
   )
 }
 
-function renderRow (row) {
+function renderRow (row, rowIndex) {
   return (
-    div('.row', row.map(cell => renderCell(cell)))
+    div('.row', row.map((cell, column) => renderCell(cell, rowIndex, column)))
   )
 }
 
 function renderGrid (grid) {
   return (
-    div('.grid', grid.map(row => renderRow(row)))
+    div('.grid', grid.map((row, rowIndex) => renderRow(row, rowIndex)))
   )
 }
 
 function startGame (e) {
   return function seedGame (state) {
-    const seededGrid = seedGrid(grid, 0.005)
+    const seededGrid = seedGrid(grid, 0.3)
 
     return Object.assign({}, state, { grid: seededGrid })
   }
