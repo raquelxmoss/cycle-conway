@@ -1,5 +1,5 @@
 import { Observable } from 'rx';
-import { div, button, h1, h2 } from '@cycle/dom';
+import { div, button, h1, h2, input } from '@cycle/dom';
 import _ from 'lodash';
 
 import seedGrid from './seed_grid'
@@ -8,35 +8,35 @@ import updateGrid from './update_grid'
 const INTRO = `This implementation of <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life" target="_blank">Conway's Game of Life</a>
   was made lovingly with <a href="http://cycle.js.org" target="_blank">Cycle.js</a><br /><br />`
 
-const grid = _.range(0, 35).map(() => {
-  return _.range(0, 35).map(() => ({}))
+const grid = _.range(0, 55).map(() => {
+  return _.range(0, 55).map(() => ({}))
 })
 
 const initialState = {
-  grid
+  grid,
 }
 
-function renderCell (cell) {
+function renderCell (cell, rowIndex, column) {
   return (
-    div(`.cell ${cell.alive ? '.alive' : ''}`)
+    div(`.cell ${cell.alive ? '.alive' : ''}`, {key: rowIndex * 55 + column})
   )
 }
 
-function renderRow (row) {
+function renderRow (row, rowIndex) {
   return (
-    div('.row', row.map(cell => renderCell(cell)))
+    div('.row', row.map((cell, column) => renderCell(cell, rowIndex, column)))
   )
 }
 
 function renderGrid (grid) {
   return (
-    div('.grid', grid.map(row => renderRow(row)))
+    div('.grid', grid.map((row, rowIndex) => renderRow(row, rowIndex)))
   )
 }
 
 function startGame (e) {
   return function seedGame (state) {
-    const seededGrid = seedGrid(grid, 0.05)
+    const seededGrid = seedGrid(grid, 0.3)
 
     return Object.assign({}, state, { grid: seededGrid })
   }
@@ -48,15 +48,28 @@ function updateGridReducer (e) {
   }
 }
 
+function updateSpeed (e) {
+  return (state) => {
+    return Object.assign({}, state, {speed: e.target.value})
+  }
+}
+
 export default function App ({DOM}) {
   const startClick$ = DOM
     .select('.start')
     .events('click')
 
-  const tick$ = Observable.interval(100)
+  const speedInput$ = DOM
+    .select('.speed')
+    .events('change')
+    .map(e => e.target.value)
+    .startWith(250)
 
   const startGame$ = startClick$
     .map(e => startGame(e))
+
+  const tick$ = speedInput$
+    .flatMapLatest(speed => Observable.interval(speed))
 
   const grid$ = tick$
     .map(e => updateGridReducer(e))
@@ -71,12 +84,15 @@ export default function App ({DOM}) {
     .scan((state, reducer) => reducer(state))
 
   return {
-    DOM: state$.map(({grid}) => (
+    DOM: state$.map(state => (
       div('.container', [
-        h1('.header', 'Conway\'s Game of Life'),
-        div('.intro', {innerHTML: INTRO}),
-        button('.start', 'Start'),
-        renderGrid(grid)
+        div([
+          h1('.header', 'Conway\'s Game of Life'),
+          div('.intro', {innerHTML: INTRO}),
+          input('.speed', {type: 'range', min: 0, max: 500}),
+          button('.start', 'Start'),
+        ]),
+        renderGrid(state.grid)
       ])
     ))
   };
