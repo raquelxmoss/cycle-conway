@@ -4,6 +4,7 @@ import _ from 'lodash';
 
 import seedGrid from './seed_grid'
 import updateGrid from './update_grid'
+import renderGrid from './view'
 
 const INTRO = `This implementation of <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life" target="_blank">Conway's Game of Life</a>
   was made lovingly with <a href="http://cycle.js.org" target="_blank">Cycle.js</a><br /><br />`
@@ -13,28 +14,10 @@ const grid = _.range(0, 55).map(() => {
 })
 
 const initialState = {
-  grid,
+  grid
 }
 
-function renderCell (cell, rowIndex, column) {
-  return (
-    div(`.cell ${cell.alive ? '.alive' : ''}`, {key: rowIndex * 55 + column})
-  )
-}
-
-function renderRow (row, rowIndex) {
-  return (
-    div('.row', row.map((cell, column) => renderCell(cell, rowIndex, column)))
-  )
-}
-
-function renderGrid (grid) {
-  return (
-    div('.grid', grid.map((row, rowIndex) => renderRow(row, rowIndex)))
-  )
-}
-
-function startGame (e) {
+function newGame (e) {
   return function seedGame (state) {
     const seededGrid = seedGrid(grid, 0.3)
 
@@ -44,17 +27,25 @@ function startGame (e) {
 
 function updateGridReducer (e) {
   return function updateGridState (state) {
-    return Object.assign({}, state, {grid: updateGrid(state.grid)})
+    return Object.assign({}, state, { grid: updateGrid(state.grid) })
   }
 }
 
-function updateSpeed (e) {
-  return (state) => {
-    return Object.assign({}, state, {speed: e.target.value})
-  }
+function makeInterval (speed) {
+  if (speed === 0) { return Observable.just('stop') }
+
+  return Observable.interval(speed)
 }
 
 export default function App ({DOM}) {
+  const newGameClick$ = DOM
+    .select('.new-game')
+    .events('click')
+
+  const pauseClick$ = DOM
+    .select('.pause')
+    .events('click')
+
   const startClick$ = DOM
     .select('.start')
     .events('click')
@@ -65,17 +56,31 @@ export default function App ({DOM}) {
     .map(e => e.target.value)
     .startWith(250)
 
-  const startGame$ = startClick$
-    .map(e => startGame(e))
+  const newGame$ = newGameClick$
+    .map(e => newGame(e))
 
-  const tick$ = speedInput$
-    .flatMapLatest(speed => Observable.interval(speed))
+  const pauseGame$ = pauseClick$
+    .map(e => 0)
+    .startWith(250)
+
+  const startGame$ = startClick$
+    .map(e => speedInput$.latest)
+
+  const gameControl$ = Observable.merge(
+    speedInput$,
+    pauseGame$,
+    newGame$,
+    startGame$
+  )
+
+  const tick$ = gameControl$
+    .flatMapLatest(speed => makeInterval(speed))
 
   const grid$ = tick$
     .map(e => updateGridReducer(e))
 
   const reducers$ = Observable.merge(
-    startGame$,
+    newGame$,
     grid$
   )
 
@@ -90,7 +95,9 @@ export default function App ({DOM}) {
           h1('.header', 'Conway\'s Game of Life'),
           div('.intro', {innerHTML: INTRO}),
           input('.speed', {type: 'range', min: 0, max: 500}),
-          button('.start', 'Start'),
+          button('.new-game', 'New Game'),
+          button('.pause', 'Pause'),
+          button('.start', 'Start')
         ]),
         renderGrid(state.grid)
       ])
