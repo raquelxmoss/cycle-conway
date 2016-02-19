@@ -1,5 +1,5 @@
 import { Observable } from 'rx';
-import { div, button, h1, h2, input } from '@cycle/dom';
+import { p, div, button, h1, h2, input } from '@cycle/dom';
 import _ from 'lodash';
 
 import seedGrid from './seed_grid'
@@ -94,10 +94,17 @@ export default function App ({DOM}) {
         div([
           h1('.header', 'Conway\'s Game of Life'),
           div('.intro', {innerHTML: INTRO}),
-          input('.speed', {type: 'range', min: 0, max: 500}),
-          button('.new-game', 'New Game'),
-          button('.pause', 'Pause'),
-          button('.start', 'Start')
+          div([
+            div([
+              p('Adjust speed'),
+              input('.speed', {type: 'range', min: 0, max: 500}),
+            ]),
+            div([
+              button('.new-game', 'New Game'),
+              button('.pause', 'Pause'),
+              button('.start', 'Start')
+            ])
+          ])
         ]),
         renderGrid(state.grid)
       ])
