@@ -49,7 +49,7 @@ h1 {
   background: #009688;
 }
 
-.start {
+button {
   margin: 1em;
   padding: 1em 1.5em;
   color: white;
@@ -60,10 +60,10 @@ h1 {
   transition: background 0.3s;
 }
 
-.start:hover {
+button:hover {
   background: #2196F3;
 }
 
-.start:active, .start:focus {
+button:active, button:focus {
   outline: none;
 }
