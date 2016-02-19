@@ -28793,6 +28793,10 @@ var _update_grid = require('./update_grid');
 
 var _update_grid2 = _interopRequireDefault(_update_grid);
 
+var _view = require('./view');
+
+var _view2 = _interopRequireDefault(_view);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var INTRO = 'This implementation of <a href="https://en.wikipedia.org/wiki/Conway\'s_Game_of_Life" target="_blank">Conway\'s Game of Life</a>\n  was made lovingly with <a href="http://cycle.js.org" target="_blank">Cycle.js</a><br /><br />';
@@ -28807,23 +28811,7 @@ var initialState = {
   grid: grid
 };
 
-function renderCell(cell, rowIndex, column) {
-  return (0, _dom.div)('.cell ' + (cell.alive ? '.alive' : ''), { key: rowIndex * 55 + column });
-}
-
-function renderRow(row, rowIndex) {
-  return (0, _dom.div)('.row', row.map(function (cell, column) {
-    return renderCell(cell, rowIndex, column);
-  }));
-}
-
-function renderGrid(grid) {
-  return (0, _dom.div)('.grid', grid.map(function (row, rowIndex) {
-    return renderRow(row, rowIndex);
-  }));
-}
-
-function startGame(e) {
+function newGame(e) {
   return function seedGame(state) {
     var seededGrid = (0, _seed_grid2.default)(grid, 0.3);
 
@@ -28837,14 +28825,20 @@ function updateGridReducer(e) {
   };
 }
 
-function updateSpeed(e) {
-  return function (state) {
-    return Object.assign({}, state, { speed: e.target.value });
-  };
+function makeInterval(speed) {
+  if (speed === 0) {
+    return _rx.Observable.just('stop');
+  }
+
+  return _rx.Observable.interval(speed);
 }
 
 function App(_ref) {
   var DOM = _ref.DOM;
+
+  var newGameClick$ = DOM.select('.new-game').events('click');
+
+  var pauseClick$ = DOM.select('.pause').events('click');
 
   var startClick$ = DOM.select('.start').events('click');
 
@@ -28852,19 +28846,29 @@ function App(_ref) {
     return e.target.value;
   }).startWith(250);
 
-  var startGame$ = startClick$.map(function (e) {
-    return startGame(e);
+  var newGame$ = newGameClick$.map(function (e) {
+    return newGame(e);
   });
 
-  var tick$ = speedInput$.flatMapLatest(function (speed) {
-    return _rx.Observable.interval(speed);
+  var pauseGame$ = pauseClick$.map(function (e) {
+    return 0;
+  }).startWith(250);
+
+  var startGame$ = startClick$.map(function (e) {
+    return speedInput$.latest;
+  });
+
+  var gameControl$ = _rx.Observable.merge(speedInput$, pauseGame$, newGame$, startGame$);
+
+  var tick$ = gameControl$.flatMapLatest(function (speed) {
+    return makeInterval(speed);
   });
 
   var grid$ = tick$.map(function (e) {
     return updateGridReducer(e);
   });
 
-  var reducers$ = _rx.Observable.merge(startGame$, grid$);
+  var reducers$ = _rx.Observable.merge(newGame$, grid$);
 
   var state$ = reducers$.startWith(initialState).scan(function (state, reducer) {
     return reducer(state);
@@ -28872,12 +28876,12 @@ function App(_ref) {
 
   return {
     DOM: state$.map(function (state) {
-      return (0, _dom.div)('.container', [(0, _dom.div)([(0, _dom.h1)('.header', 'Conway\'s Game of Life'), (0, _dom.div)('.intro', { innerHTML: INTRO }), (0, _dom.input)('.speed', { type: 'range', min: 0, max: 500 }), (0, _dom.button)('.start', 'Start')]), renderGrid(state.grid)]);
+      return (0, _dom.div)('.container', [(0, _dom.div)([(0, _dom.h1)('.header', 'Conway\'s Game of Life'), (0, _dom.div)('.intro', { innerHTML: INTRO }), (0, _dom.div)([(0, _dom.div)([(0, _dom.p)('Adjust speed'), (0, _dom.input)('.speed', { type: 'range', min: 0, max: 500 })]), (0, _dom.div)([(0, _dom.button)('.new-game', 'New Game'), (0, _dom.button)('.pause', 'Pause'), (0, _dom.button)('.start', 'Start')])])]), (0, _view2.default)(state.grid)]);
     })
   };
 }
 
-},{"./seed_grid":66,"./update_grid":68,"@cycle/dom":3,"lodash":21,"rx":25}],65:[function(require,module,exports){
+},{"./seed_grid":66,"./update_grid":68,"./view":69,"@cycle/dom":3,"lodash":21,"rx":25}],65:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29009,4 +29013,30 @@ function updateGrid(grid) {
   });
 }
 
-},{"./update_cell":67}]},{},[1]);
+},{"./update_cell":67}],69:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = renderGrid;
+
+var _dom = require('@cycle/dom');
+
+function renderCell(cell, rowIndex, column) {
+  return (0, _dom.div)('.cell ' + (cell.alive ? '.alive' : ''), { key: rowIndex * 55 + column });
+}
+
+function renderRow(row, rowIndex) {
+  return (0, _dom.div)('.row', row.map(function (cell, column) {
+    return renderCell(cell, rowIndex, column);
+  }));
+}
+
+function renderGrid(grid) {
+  return (0, _dom.div)('.grid', grid.map(function (row, rowIndex) {
+    return renderRow(row, rowIndex);
+  }));
+}
+
+},{"@cycle/dom":3}]},{},[1]);
